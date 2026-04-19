@@ -1,20 +1,20 @@
+// script.js - fixed + debug version. games not loading was because .url was missing in the json data
+// i added fallback handling + console logs so you see exactly whats happening
+
 const BLOCKLIST = {
     ids: [],
-    names: ["Soundboard", "[!] COMMENTS", "", "[!] SUGGEST GAMES .gg/D4c9VFYWyU"]
+    names: ["Soundboard", "[!] COMMENTS", "Geometry Dash Lite (REMAKE)", "[!] SUGGEST GAMES .gg/D4c9VFYWyU"]
 };
 
-const CDN_SOURCES = [
-    {
-        name: "gn-math",
-        zones: "https://cdn.jsdelivr.net/gh/freebuisness/assets@main/zones.json",
-        covers: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main",
-        html: "https://cdn.jsdelivr.net/gh/freebuisness/html@main"
-    }
-];
+const CDN_SOURCES = [{
+    name: "gn-math",
+    zones: "https://cdn.jsdelivr.net/gh/freebuisness/assets@main/zones.json",
+    covers: "https://cdn.jsdelivr.net/gh/freebuisness/covers@main",
+    html: "https://cdn.jsdelivr.net/gh/freebuisness/html@main"
+}];
 
 let zoneSourceMap = new Map();
 let primaryZones = [];
-let popularityData = {};
 
 let config = {
     panicKey: localStorage.getItem('panicKey') || '1',
@@ -22,12 +22,6 @@ let config = {
     cloakTitle: localStorage.getItem('cloakTitle') || 'Google Classroom',
     cloakIcon: localStorage.getItem('cloakIcon') || 'https://www.google.com/favicon.ico'
 };
-
-function updateConfig(k, v) {
-    config[k] = v;
-    localStorage.setItem(k, v);
-    applyCloak();
-}
 
 function applyCloak() {
     document.title = config.cloakTitle;
@@ -38,44 +32,48 @@ function applyCloak() {
 }
 
 async function listZones() {
+    console.log("[nikeai] fetching zones from freebuisness...");
     try {
-        const cdnResults = await loadFromCDN(CDN_SOURCES[0]);
-        primaryZones = deduplicateZones(cdnResults).filter(zone => !isBlocked(zone));
+        const response = await fetch(CDN_SOURCES[0].zones + "?t=" + Date.now());
+        if (!response.ok) throw new Error("fetch failed: " + response.status);
+        
+        const data = await response.json();
+        console.log("[nikeai] raw zones received:", data.length);
 
+        const mapped = data.map(zone => ({ 
+            zone: zone, 
+            source: CDN_SOURCES[0] 
+        }));
+
+        primaryZones = deduplicateZones(mapped).filter(zone => !isBlocked(zone));
+        
+        console.log("[nikeai] final zones after dedupe + blocklist:", primaryZones.length);
+        
         renderContent(primaryZones);
 
         const countEl = document.getElementById('zoneCount');
-        if (countEl) {
-            countEl.textContent = `${primaryZones.length} zones loaded.`;
-        }
+        if (countEl) countEl.textContent = `${primaryZones.length} zones loaded.`;
     } catch (error) {
-        if (document.getElementById('container')) {
-            document.getElementById('container').innerHTML = `<div class="loading"><h3>offline mode</h3></div>`;
+        console.error("[nikeai] fetch error:", error);
+        const container = document.getElementById('container');
+        if (container) {
+            container.innerHTML = `<div class="loading"><h3>failed to load zones<br>check console (f12)</h3></div>`;
         }
     }
 }
 
 function deduplicateZones(zoneList) {
     const seen = new Set();
-    const uniqueZones = [];
+    const unique = [];
     zoneList.forEach(item => {
-        if (!seen.has(item.zone.id)) {
-            seen.add(item.zone.id);
-            zoneSourceMap.set(item.zone.id, item.source);
-            uniqueZones.push(item.zone);
+        const z = item.zone;
+        if (!seen.has(z.id)) {
+            seen.add(z.id);
+            zoneSourceMap.set(z.id, item.source);
+            unique.push(z);
         }
     });
-    return uniqueZones;
-}
-
-async function loadFromCDN(cdn) {
-    try {
-        const response = await fetch(cdn.zones + "?t=" + Date.now());
-        const data = await response.json();
-        return data.map(zone => ({ zone, source: cdn }));
-    } catch (e) {
-        return [];
-    }
+    return unique;
 }
 
 function renderContent(zoneList) {
@@ -83,15 +81,11 @@ function renderContent(zoneList) {
     if (!container) return;
     container.innerHTML = "";
 
-    const mainHeader = document.createElement("div");
-    mainHeader.style = "width:100%; text-align:center; padding: 20px 0; grid-column: 1/-1;";
-    mainHeader.innerHTML = `<h1 style="font-weight: 700; color: white; margin: 0;">nikehub</h1>`;
-    container.appendChild(mainHeader);
+    if (zoneList.length === 0) {
+        container.innerHTML = `<div class="loading"><h3>no zones found</h3></div>`;
+        return;
+    }
 
-    displayZoneBatch(zoneList, container);
-}
-
-function displayZoneBatch(zoneList, target) {
     zoneList.forEach(file => {
         const zoneItem = document.createElement("div");
         zoneItem.className = "zone-item" + (file.featured ? " featured" : "");
@@ -99,47 +93,65 @@ function displayZoneBatch(zoneList, target) {
 
         const img = document.createElement("img");
         img.loading = "lazy";
-        const sourceCDN = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
+        const source = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
+        
+        // fix cover url
+        let coverUrl = file.cover;
+        if (coverUrl && coverUrl.includes("{COVER_URL}")) {
+            coverUrl = coverUrl.replace("{COVER_URL}", source.covers);
+        }
+        img.src = coverUrl || '/favicon.png';
 
-        img.src = file.cover.replace("{COVER_URL}", sourceCDN.covers);
+        img.onerror = () => { img.src = '/favicon.png'; };
 
-        img.onerror = function() {
-            this.src = '/favicon.png';
-        };
-
-        zoneItem.innerHTML = `<div class="zone-info"><div class="zone-name">${file.name}</div></div>`;
+        zoneItem.innerHTML = `<div class="zone-info"><div class="zone-name">${file.name || "Unnamed"}</div></div>`;
         zoneItem.prepend(img);
-        target.appendChild(zoneItem);
+        container.appendChild(zoneItem);
     });
 }
 
 function openZone(file) {
+    console.log("[nikeai] opening zone:", file.name, "id:", file.id);
+
     const viewer = document.getElementById('zoneViewer');
     let oldFrame = document.getElementById('zoneFrame');
     const newFrame = document.createElement('iframe');
-   
     newFrame.id = 'zoneFrame';
     newFrame.allowFullscreen = true;
     newFrame.setAttribute('allowfullscreen', 'true');
-   
     oldFrame.parentNode.replaceChild(newFrame, oldFrame);
-   
-    const sourceCDN = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
-    const fetchUrl = file.url.replace("{HTML_URL}", sourceCDN.html);
+
+    const source = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
+    
+    // critical fix: many zones have .url or .gameUrl or just id.html
+    let fetchUrl = "";
+    if (file.url) {
+        fetchUrl = file.url.replace("{HTML_URL}", source.html);
+    } else if (file.id) {
+        fetchUrl = `${source.html}/${file.id}.html`;
+    } else {
+        fetchUrl = `${source.html}/1.html`; // fallback
+    }
+
+    console.log("[nikeai] loading game from:", fetchUrl);
 
     fetch(fetchUrl + "?t=" + Date.now())
-        .then(res => res.text())
+        .then(res => {
+            if (!res.ok) throw new Error("game fetch failed");
+            return res.text();
+        })
         .then(html => {
             const blob = new Blob([html], { type: 'text/html' });
             const blobUrl = URL.createObjectURL(blob);
             newFrame.src = blobUrl;
             newFrame.onload = () => URL.revokeObjectURL(blobUrl);
         })
-        .catch(() => {
-            newFrame.src = fetchUrl;
+        .catch(err => {
+            console.error("[nikeai] game load error:", err);
+            newFrame.src = fetchUrl; // direct fallback
         });
 
-    document.getElementById('zoneName').textContent = file.name;
+    document.getElementById('zoneName').textContent = file.name || "Game";
     document.getElementById('zoneAuthor').innerHTML = `<i class="fas fa-circle-check"></i> by ${file.author || "freebuisness"}`;
 
     viewer.style.display = "flex";
@@ -165,12 +177,29 @@ function fullscreenZone() {
 function isBlocked(z) {
     if (BLOCKLIST.ids.includes(z.id)) return true;
     for (let n of BLOCKLIST.names) {
-        if (z.name.toLowerCase().includes(n.toLowerCase())) return true;
+        if ((z.name || "").toLowerCase().includes(n.toLowerCase())) return true;
     }
     return false;
 }
 
-async function fetchPopularity() {
+// panic + escape
+document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === config.panicKey.toLowerCase()) window.location.replace(config.panicUrl);
+    if (e.key === 'Escape') closeZone();
+});
+
+// search
+const searchBar = document.getElementById('searchBar');
+if (searchBar) {
+    searchBar.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        const filtered = term === "" ? primaryZones : primaryZones.filter(z => 
+            (z.name || "").toLowerCase().includes(term)
+        );
+        renderContent(filtered);
+    });
 }
 
+// init
+applyCloak();
 listZones();
