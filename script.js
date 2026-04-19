@@ -1,6 +1,3 @@
-// script.js - fixed + cleaned version with your "asphalt" branding
-// i put the openZone function back together properly (it was broken in your paste)
-
 const BLOCKLIST = {
     ids: [],
     names: ["Soundboard", "[!] COMMENTS", "[!] SUGGEST GAMES .gg/D4c9VFYWyU"]
@@ -32,13 +29,13 @@ function applyCloak() {
 }
 
 async function listZones() {
-    console.log("[nikeai] fetching zones from freebuisness...");
+    console.log("fetching zones from freebuisness...");
     try {
         const response = await fetch(CDN_SOURCES[0].zones + "?t=" + Date.now());
         if (!response.ok) throw new Error("fetch failed: " + response.status);
        
         const data = await response.json();
-        console.log("[nikeai] raw zones received:", data.length);
+        console.log("raw zones received:", data.length);
 
         const mapped = data.map(zone => ({
             zone: zone,
@@ -47,14 +44,14 @@ async function listZones() {
 
         primaryZones = deduplicateZones(mapped).filter(zone => !isBlocked(zone));
        
-        console.log("[nikeai] final zones after dedupe + blocklist:", primaryZones.length);
+        console.log("final zones after dedupe + blocklist:", primaryZones.length);
        
         renderContent(primaryZones);
 
         const countEl = document.getElementById('zoneCount');
         if (countEl) countEl.textContent = `${primaryZones.length} zones loaded.`;
     } catch (error) {
-        console.error("[nikeai] fetch error:", error);
+        console.error("fetch error:", error);
         const container = document.getElementById('container');
         if (container) {
             container.innerHTML = `<div class="loading"><h3>failed to load zones<br>check console (f12)</h3></div>`;
@@ -81,7 +78,6 @@ function renderContent(zoneList) {
     if (!container) return;
     container.innerHTML = "";
 
-    // your asphalt header with normal white credits
     const headerDiv = document.createElement("div");
     headerDiv.style = "width:100%; text-align:center; padding: 30px 0 20px; grid-column: 1/-1; margin-bottom: 20px;";
     headerDiv.innerHTML = `<h1 style="font-weight: 900; font-size: 42px; color: white; margin: 0; text-shadow: 0 0 20px #00ff9d;">welcome to asphalt</h1>
@@ -116,7 +112,7 @@ function renderContent(zoneList) {
 }
 
 function openZone(file) {
-    console.log("[nikeai] opening zone:", file.name, "id:", file.id);
+    console.log("opening zone:", file.name, "id:", file.id);
 
     const viewer = document.getElementById('zoneViewer');
     let oldFrame = document.getElementById('zoneFrame');
@@ -139,7 +135,7 @@ function openZone(file) {
         fetchUrl = `${source.html}/1.html`;
     }
 
-    console.log("[nikeai] loading game from:", fetchUrl);
+    console.log("loading game from:", fetchUrl);
 
     fetch(fetchUrl + "?t=" + Date.now())
         .then(res => {
@@ -153,7 +149,7 @@ function openZone(file) {
             newFrame.onload = () => URL.revokeObjectURL(blobUrl);
         })
         .catch(err => {
-            console.error("[nikeai] game load error:", err);
+            console.error("game load error:", err);
             newFrame.src = fetchUrl;
         });
 
@@ -188,13 +184,11 @@ function isBlocked(z) {
     return false;
 }
 
-// panic + escape
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === config.panicKey.toLowerCase()) window.location.replace(config.panicUrl);
     if (e.key === 'Escape') closeZone();
 });
 
-// search
 const searchBar = document.getElementById('searchBar');
 if (searchBar) {
     searchBar.addEventListener('input', (e) => {
@@ -206,6 +200,5 @@ if (searchBar) {
     });
 }
 
-// init
 applyCloak();
 listZones();
