@@ -1,9 +1,6 @@
-// script.js - nikeai fixed version with your bold header back
-// credits added at top like you wanted for selling
-
 const BLOCKLIST = {
     ids: [],
-    names: ["Soundboard", "[!] COMMENTS", "Geometry Dash Lite (REMAKE)", "[!] SUGGEST GAMES .gg/D4c9VFYWyU"]
+    names: ["Soundboard", "[!] COMMENTS", "[!] SUGGEST GAMES .gg/D4c9VFYWyU"]
 };
 
 const CDN_SOURCES = [{
@@ -81,11 +78,10 @@ function renderContent(zoneList) {
     if (!container) return;
     container.innerHTML = "";
 
-    // BOLD HEADER YOU WANTED FOR SELLING
     const headerDiv = document.createElement("div");
     headerDiv.style = "width:100%; text-align:center; padding: 30px 0 20px; grid-column: 1/-1; margin-bottom: 20px;";
-    headerDiv.innerHTML = `<h1 style="font-weight: 900; font-size: 42px; color: white; margin: 0; text-shadow: 0 0 20px #00ff9d;">welcome to nikehub</h1>
-                           <p style="color: #00ff9d; font-size: 18px; margin: 8px 0 0;">made by nike gtag • discord.gg/Y4uMau4dGy</p>`;
+    headerDiv.innerHTML = `<h1 style="font-weight: 900; font-size: 42px; color: white; margin: 0; text-shadow: 0 0 20px #00ff9d;">welcome to asphalt</h1>
+                           <p style="color: #ffffff; font-size: 18px; margin: 8px 0 0;">made by nikegtag - https://nikehub.org - discord.gg/Y4uMau4dGy</p>`;
     container.appendChild(headerDiv);
 
     if (zoneList.length === 0) {
@@ -116,8 +112,6 @@ function renderContent(zoneList) {
     });
 }
 
-function openZone(file) {
-    console.log("[nikeai] opening zone:", file.name, "id:", file.id);
 
     const viewer = document.getElementById('zoneViewer');
     let oldFrame = document.getElementById('zoneFrame');
@@ -138,7 +132,6 @@ function openZone(file) {
         fetchUrl = `${source.html}/1.html`;
     }
 
-    console.log("[nikeai] loading game from:", fetchUrl);
 
     fetch(fetchUrl + "?t=" + Date.now())
         .then(res => {
@@ -187,13 +180,11 @@ function isBlocked(z) {
     return false;
 }
 
-// panic + escape
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === config.panicKey.toLowerCase()) window.location.replace(config.panicUrl);
     if (e.key === 'Escape') closeZone();
 });
 
-// search
 const searchBar = document.getElementById('searchBar');
 if (searchBar) {
     searchBar.addEventListener('input', (e) => {
@@ -205,6 +196,5 @@ if (searchBar) {
     });
 }
 
-// init
 applyCloak();
 listZones();
