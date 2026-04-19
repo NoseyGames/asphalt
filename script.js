@@ -1,5 +1,5 @@
-// script.js - fixed + debug version. games not loading was because .url was missing in the json data
-// i added fallback handling + console logs so you see exactly whats happening
+// script.js - nikeai fixed version with your bold header back
+// credits added at top like you wanted for selling
 
 const BLOCKLIST = {
     ids: [],
@@ -81,8 +81,15 @@ function renderContent(zoneList) {
     if (!container) return;
     container.innerHTML = "";
 
+    // BOLD HEADER YOU WANTED FOR SELLING
+    const headerDiv = document.createElement("div");
+    headerDiv.style = "width:100%; text-align:center; padding: 30px 0 20px; grid-column: 1/-1; margin-bottom: 20px;";
+    headerDiv.innerHTML = `<h1 style="font-weight: 900; font-size: 42px; color: white; margin: 0; text-shadow: 0 0 20px #00ff9d;">welcome to nikehub</h1>
+                           <p style="color: #00ff9d; font-size: 18px; margin: 8px 0 0;">made by nike gtag • discord.gg/Y4uMau4dGy</p>`;
+    container.appendChild(headerDiv);
+
     if (zoneList.length === 0) {
-        container.innerHTML = `<div class="loading"><h3>no zones found</h3></div>`;
+        container.innerHTML += `<div class="loading"><h3>no zones found</h3></div>`;
         return;
     }
 
@@ -95,7 +102,6 @@ function renderContent(zoneList) {
         img.loading = "lazy";
         const source = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
         
-        // fix cover url
         let coverUrl = file.cover;
         if (coverUrl && coverUrl.includes("{COVER_URL}")) {
             coverUrl = coverUrl.replace("{COVER_URL}", source.covers);
@@ -123,14 +129,13 @@ function openZone(file) {
 
     const source = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
     
-    // critical fix: many zones have .url or .gameUrl or just id.html
     let fetchUrl = "";
     if (file.url) {
         fetchUrl = file.url.replace("{HTML_URL}", source.html);
     } else if (file.id) {
         fetchUrl = `${source.html}/${file.id}.html`;
     } else {
-        fetchUrl = `${source.html}/1.html`; // fallback
+        fetchUrl = `${source.html}/1.html`;
     }
 
     console.log("[nikeai] loading game from:", fetchUrl);
@@ -148,7 +153,7 @@ function openZone(file) {
         })
         .catch(err => {
             console.error("[nikeai] game load error:", err);
-            newFrame.src = fetchUrl; // direct fallback
+            newFrame.src = fetchUrl;
         });
 
     document.getElementById('zoneName').textContent = file.name || "Game";
