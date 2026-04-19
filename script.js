@@ -1,3 +1,6 @@
+// script.js - fixed + cleaned version with your "asphalt" branding
+// i put the openZone function back together properly (it was broken in your paste)
+
 const BLOCKLIST = {
     ids: [],
     names: ["Soundboard", "[!] COMMENTS", "[!] SUGGEST GAMES .gg/D4c9VFYWyU"]
@@ -33,19 +36,19 @@ async function listZones() {
     try {
         const response = await fetch(CDN_SOURCES[0].zones + "?t=" + Date.now());
         if (!response.ok) throw new Error("fetch failed: " + response.status);
-        
+       
         const data = await response.json();
         console.log("[nikeai] raw zones received:", data.length);
 
-        const mapped = data.map(zone => ({ 
-            zone: zone, 
-            source: CDN_SOURCES[0] 
+        const mapped = data.map(zone => ({
+            zone: zone,
+            source: CDN_SOURCES[0]
         }));
 
         primaryZones = deduplicateZones(mapped).filter(zone => !isBlocked(zone));
-        
+       
         console.log("[nikeai] final zones after dedupe + blocklist:", primaryZones.length);
-        
+       
         renderContent(primaryZones);
 
         const countEl = document.getElementById('zoneCount');
@@ -78,6 +81,7 @@ function renderContent(zoneList) {
     if (!container) return;
     container.innerHTML = "";
 
+    // your asphalt header with normal white credits
     const headerDiv = document.createElement("div");
     headerDiv.style = "width:100%; text-align:center; padding: 30px 0 20px; grid-column: 1/-1; margin-bottom: 20px;";
     headerDiv.innerHTML = `<h1 style="font-weight: 900; font-size: 42px; color: white; margin: 0; text-shadow: 0 0 20px #00ff9d;">welcome to asphalt</h1>
@@ -97,13 +101,12 @@ function renderContent(zoneList) {
         const img = document.createElement("img");
         img.loading = "lazy";
         const source = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
-        
+       
         let coverUrl = file.cover;
         if (coverUrl && coverUrl.includes("{COVER_URL}")) {
             coverUrl = coverUrl.replace("{COVER_URL}", source.covers);
         }
         img.src = coverUrl || '/favicon.png';
-
         img.onerror = () => { img.src = '/favicon.png'; };
 
         zoneItem.innerHTML = `<div class="zone-info"><div class="zone-name">${file.name || "Unnamed"}</div></div>`;
@@ -112,17 +115,21 @@ function renderContent(zoneList) {
     });
 }
 
+function openZone(file) {
+    console.log("[nikeai] opening zone:", file.name, "id:", file.id);
 
     const viewer = document.getElementById('zoneViewer');
     let oldFrame = document.getElementById('zoneFrame');
     const newFrame = document.createElement('iframe');
+   
     newFrame.id = 'zoneFrame';
     newFrame.allowFullscreen = true;
     newFrame.setAttribute('allowfullscreen', 'true');
+   
     oldFrame.parentNode.replaceChild(newFrame, oldFrame);
 
     const source = zoneSourceMap.get(file.id) || CDN_SOURCES[0];
-    
+   
     let fetchUrl = "";
     if (file.url) {
         fetchUrl = file.url.replace("{HTML_URL}", source.html);
@@ -132,6 +139,7 @@ function renderContent(zoneList) {
         fetchUrl = `${source.html}/1.html`;
     }
 
+    console.log("[nikeai] loading game from:", fetchUrl);
 
     fetch(fetchUrl + "?t=" + Date.now())
         .then(res => {
@@ -180,21 +188,24 @@ function isBlocked(z) {
     return false;
 }
 
+// panic + escape
 document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === config.panicKey.toLowerCase()) window.location.replace(config.panicUrl);
     if (e.key === 'Escape') closeZone();
 });
 
+// search
 const searchBar = document.getElementById('searchBar');
 if (searchBar) {
     searchBar.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase().trim();
-        const filtered = term === "" ? primaryZones : primaryZones.filter(z => 
+        const filtered = term === "" ? primaryZones : primaryZones.filter(z =>
             (z.name || "").toLowerCase().includes(term)
         );
         renderContent(filtered);
     });
 }
 
+// init
 applyCloak();
 listZones();
