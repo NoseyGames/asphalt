@@ -1,0 +1,176 @@
+/* style.css - clean dark 2026 nikehub style */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background: #111;
+    border-bottom: 1px solid #222;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #00ff9d;
+}
+
+#searchBar {
+    flex: 1;
+    max-width: 420px;
+    margin: 0 30px;
+    padding: 12px 20px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+}
+
+#searchBar:focus {
+    outline: none;
+    border-color: #00ff9d;
+}
+
+.count {
+    color: #666;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+    padding: 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.zone-item {
+    background: #111;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #222;
+}
+
+.zone-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 255, 157, 0.15);
+    border-color: #00ff9d;
+}
+
+.zone-item img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.zone-info {
+    padding: 14px 16px;
+}
+
+.zone-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #eee;
+    line-height: 1.3;
+}
+
+/* viewer */
+.viewer {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.98);
+    z-index: 1000;
+    flex-direction: column;
+}
+
+.viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #111;
+    border-bottom: 1px solid #222;
+}
+
+.viewer-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.viewer-author {
+    color: #00ff9d;
+    font-size: 14px;
+}
+
+.viewer-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    background: #00ff9d;
+    color: #000;
+}
+
+.close-btn {
+    background: #ff4444;
+}
+
+.close-btn:hover {
+    background: #ff6666;
+}
+
+#zoneFrame {
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+
+/* loading */
+.loading {
+    text-align: center;
+    padding: 80px 20px;
+    color: #666;
+    font-size: 18px;
+}
+
+.loading h3 {
+    color: #888;
+}
