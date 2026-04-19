@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Classroom</title>
+    <link rel="icon" href="https://www.google.com/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/4b9ba14b0f.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">asphalt</div>
+        <input type="text" id="searchBar" placeholder="search zones..." autocomplete="off">
+        <div id="zoneCount" class="count">0 zones loaded.</div>
+    </div>
+
+    <div id="container" class="grid"></div>
+
+    <!-- zone viewer -->
+    <div id="zoneViewer" class="viewer">
+        <div class="viewer-header">
+            <div id="zoneName" class="viewer-title">Loading...</div>
+            <div id="zoneAuthor" class="viewer-author"></div>
+            <div class="viewer-controls">
+                <button onclick="fullscreenZone()" class="btn"><i class="fas fa-expand"></i></button>
+                <button id="downloadGameBtn" onclick="" class="btn" style="display:none;">↓ source</button>
+                <button onclick="closeZone()" class="btn close-btn">✕</button>
+            </div>
+        </div>
+        <iframe id="zoneFrame" allowfullscreen></iframe>
+    </div>
+
+    <!-- external script -->
+    <script src="script.js"></script>
+</body>
+</html>
